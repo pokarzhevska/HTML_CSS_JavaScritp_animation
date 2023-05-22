@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <title>Document</title>
+    <script src="jquery.min.js"></script>
+</head>
+
+<body>
+    <div style="width: 100%; height: 100vh"></div>
+    <div class="anim">
+        <div class="anim-container" id="imageAnimContainer">
+            <img src="image-1.jpg" class="animImage mainImage" id="image1">
+            <img src="image-2.jpg" class="animImage stateImage" id="image2">
+            <img src="image-3.jpg" class="animImage hideStateImage" id="image3">
+            <img src="image-4.jpg" class="animImage hideImage" id="image4">
+            <p class="imageTxt" id="imageTxt">image1</p>
+            <p class="imageBottomTxt" id="imageBottomTxt">image1</p>
+            <div class="midHr"></div>
+            <div class="navigation">
+                <p class="about active">ABOUT</p>
+                <p class="origin">origin</p>
+                <p class="imageNavTxt active" id="image1NavText">CH I</p>
+                <p class="imageNavTxt" id="image2NavText">CH II</p>
+                <p class="imageNavTxt" id="image3NavText">CH III</p>
+                <p class="imageNavTxt" id="image4NavText">CH IV</p>
+            </div>
+        </div>
+    </div>
+    <div style="width: 100%; height: 100vh"></div>
+    <script>
+        var scrollTimeout = null;
+        var scrollThreshold = 100;
+        var animFlg = true;
+
+        var imageClass = ['mainImage', 'stateImage', 'hideStateImage', 'hideImage'];
+
+        var fixedElement = document.getElementById("imageAnimContainer");
+
+        var fixedElementPosition = fixedElement.getBoundingClientRect().top + window.pageYOffset;
+
+        fixedElement.addEventListener('DOMMouseScroll', function (event) {
+            animImage(event);
+        });
+
+        fixedElement.addEventListener('wheel', function (event) {
+            animImage(event);
+        });
+
+        window.addEventListener('scroll', function(event) {
+            var fixedElementPosition = fixedElement.getBoundingClientRect().top + window.pageYOffset;
+            if ((fixedElementPosition < document.documentElement.scrollTop && $('.mainImage')[0].id == 'image1') || (fixedElementPosition > document.documentElement.scrollTop && $('.mainImage')[0].id == 'image4')) {
+                $('.anim-container').addClass('positionFixed')
+            }
+        })
+
+        window.addEventListener('DOMMouseScroll', function(event) {
+            var fixedElementPosition = fixedElement.getBoundingClientRect().top + window.pageYOffset;
+            if ((fixedElementPosition < document.documentElement.scrollTop && $('.mainImage')[0].id == 'image1') || (fixedElementPosition > document.documentElement.scrollTop && $('.mainImage')[0].id == 'image4')) {
+                $('.anim-container').addClass('positionFixed')
+            }
+        })
+
+        function animImage(event) {
+            if (animFlg && $('.anim-container').hasClass('positionFixed')) {
+
+                animFlg = false;
+
+                setTimeout(() => {
+                    animFlg = true;
+                }, 1000);
+
+                if (scrollTimeout) {
+                    clearTimeout(scrollTimeout);
+                }
+
+                scrollTimeout = setTimeout(function () {
+                    if ((event.detail > 0 && $('.mainImage')[0].id != 'image4') || (event.detail < 0 && $('.mainImage')[0].id != 'image1') || (event.deltaY > 0 && $('.mainImage')[0].id != 'image4') || (event.deltaY < 0 && $('.mainImage')[0].id != 'image1')) {
+                        imageAnim(event);
+                        textAnim();
+                    }
+                    scrollTimeout = null;
+                }, 50);
+            }
+        };
+
+        function imageAnim(event) {
+            var mainImageID = $('.mainImage')[0].id;
+            var stateImageID = $('.stateImage')[0].id;
+            var hideStateImageID = $('.hideStateImage')[0].id;
+            var hideImageID = $('.hideImage')[0].id;
+
+            if ((event.detail > 0 && $('.mainImage')[0].id != 'image4') || (event.deltaY > 0 && $('.mainImage')[0].id != 'image4')) {
+                $('#' + mainImageID).addClass('hideImage');
+                $('#' + stateImageID).addClass('mainImage');
+                $('#' + hideStateImageID).addClass('stateImage');
+                $('#' + hideImageID).addClass('hideStateImage');
+
+                $('#' + mainImageID).removeClass('mainImage');
+                $('#' + stateImageID).removeClass('stateImage');
+                $('#' + hideStateImageID).removeClass('hideStateImage');
+                $('#' + hideImageID).removeClass('hideImage');
+            } else if ((event.detail < 0) || (event.deltaY < 0)) {
+                $('#' + mainImageID).addClass('stateImage');
+                $('#' + stateImageID).addClass('hideStateImage');
+                $('#' + hideStateImageID).addClass('hideImage');
+                $('#' + hideImageID).addClass('mainImage');
+
+                $('#' + mainImageID).removeClass('mainImage');
+                $('#' + stateImageID).removeClass('stateImage');
+                $('#' + hideStateImageID).removeClass('hideStateImage');
+                $('#' + hideImageID).removeClass('hideImage');
+            }
+
+            if ((event.detail > 0 && $('.mainImage')[0].id == 'image4') || (event.deltaY > 0 && $('.mainImage')[0].id == 'image4')) {
+                setTimeout(() => {
+                    $('.anim-container').removeClass('positionFixed')
+                    document.documentElement.scrollTop = fixedElementPosition
+                }, 1000);
+            }
+
+            if ((event.detail < 0 && $('.mainImage')[0].id == 'image1') || (event.deltaY < 0 && $('.mainImage')[0].id == 'image1')) {
+                setTimeout(() => {
+                    $('.anim-container').removeClass('positionFixed')
+                    document.documentElement.scrollTop = fixedElementPosition
+                }, 1000);
+            }
+        }
+
+        function textAnim() {
+            $('#imageTxt').addClass('imageHideTxt');
+            $('#imageBottomTxt').addClass('imageBottomHideTxt');
+            $('#imageTxt').removeClass('imageTxt');
+            $('#imageBottomHideTxt').removeClass('imageBottomHideTxt');
+            setTimeout(() => {
+                if ($('.mainImage')[0].id == 'image1') {
+                    $('#imageTxt').html('image1')
+                    $('#imageBottomTxt').html('image1')
+                } else if ($('.mainImage')[0].id == 'image2') {
+                    $('#imageTxt').html('image2')
+                    $('#imageBottomTxt').html('image2')
+                } else if ($('.mainImage')[0].id == 'image3') {
+                    $('#imageTxt').html('image3')
+                    $('#imageBottomTxt').html('image3')
+                } else {
+                    $('#imageTxt').html('image4')
+                    $('#imageBottomTxt').html('image4')
+                }
+                $('#imageTxt').addClass('imageTxt');
+                $('#imageBottomTxt').addClass('imageBottomTxt');
+                $('#imageTxt').removeClass('imageHideTxt')
+                $('#imageBottomTxt').removeClass('imageBottomHideTxt')
+            }, 1000);
+
+            $('.imageNavTxt').removeClass('active')
+            $('#' + $('.mainImage')[0].id + 'NavText').addClass('active');
+        }
+    </script>
+</body>
+
+</html>
